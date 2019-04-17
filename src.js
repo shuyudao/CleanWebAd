@@ -83,15 +83,10 @@ function clean_bjh() {
 	let resultCounter = $(".nums_text");
 	let resultCounterText = $(".nums_text").text();
 
-	// 轮询每个链接，获取链接背后的真实url
-	// 发现URL包含baijiahao，删除之
-	// 如果是聚合搜索结果，且聚合搜索结果中全是百家号，则删除整个聚合搜索框
 	tags.each(function (i, v) {
 		let url = $(this).attr('href');
 		(function (url, currentNode) {
 			url = url.indexOf("eqid") < 0 ? url + "&wd=&eqid=" : url;
-
-			// 这里不能使用$.ajax()，因为浏览器默认禁止发起修改headers的请求
 			GM.xmlHttpRequest({
 				method: "GET",
 				url: url,
@@ -116,24 +111,17 @@ function clean_bjh() {
 						if (realUrl.indexOf('baijia') !== -1) {
 							bjhCounter ++;
 
-							// 去除父元素 直接删除该搜索结果
-							// 针对单独搜索结果
 							$(currentNode).parents('.c-container').remove();
 
-							// 如果『聚合搜索』内容为空，直接删除父元素
-							// 针对聚合搜索结果
 							if (!top.children().length) {
 								top.parent().remove();
 							}
 
 						} else {
-							// 还原真实地址
-							// 减小百度采集用户链接点击信息的概率
-							// 保护隐私，从我做起
+
 							$(currentNode).attr('href', realUrl);
 						}
 
-						resultCounter.text(resultCounterText + "，其中包含" + bjhCounter + "个百家号链接，已全部去除");
 					}
 				},
 			});
